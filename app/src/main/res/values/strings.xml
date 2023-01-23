@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">MyComposeApp</string>
+    <string name="title_activity_login">Login</string>
+    <string name="patta_survey_app">Patta Survey App</string>
+    <string name="login">Log in</string>
+    <string name="enter_credentials">Please enter credentials below</string>
+</resources>
