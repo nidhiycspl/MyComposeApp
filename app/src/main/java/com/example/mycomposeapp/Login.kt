@@ -7,15 +7,19 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -51,8 +55,10 @@ class Login : ComponentActivity() {
 
 @Composable
 fun LoginScreenUi(context: Context) {
+    val focusManager = LocalFocusManager.current
     var email = remember { mutableStateOf("") }
     var password = remember { mutableStateOf("") }
+    var isError by rememberSaveable { mutableStateOf(false) }
 
     Box(modifier = Modifier
         .fillMaxSize()
@@ -93,28 +99,32 @@ fun LoginScreenUi(context: Context) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
-
             OutlinedTextField(
                 modifier = Modifier
                 .fillMaxWidth(),
                 value = email.value ,
                 onValueChange = {
-                       email.value = it
+                        email.value = it
+                        isError = false
                 },
                 label = { Text(text = "Email")},
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
+                keyboardActions = KeyboardActions(onNext = {focusManager.moveFocus(FocusDirection.Down)}),
                 leadingIcon = {
                     Icon(painter = painterResource(id = R.drawable.baseline_email),
                         tint = Color(ContextCompat.getColor(context,R.color.black)),
                         contentDescription = null )
-
                 },
                 trailingIcon = {
-                    IconButton(onClick = { }) {
-                        Icon(modifier = Modifier.padding(end = 4.dp),
-                            imageVector = Icons.Default.Clear,
-                            contentDescription = null)
+                    if(email.value.isNotEmpty()){
+                        IconButton(onClick = { email.value = "" },
+                            content = {
+                                Icon(modifier = Modifier.padding(end = 4.dp),
+                                    imageVector = Icons.Default.Clear,
+                                    contentDescription = null)
+                            }
+                        )
                     }
                 }
             )
@@ -131,30 +141,32 @@ fun LoginScreenUi(context: Context) {
                 label = { Text(text = "Password")},
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = {focusManager.clearFocus()}),
                 leadingIcon = {
                     Icon(
                         painter = painterResource(id = R.drawable.baseline_password),
                         tint = Color(ContextCompat.getColor(context, R.color.black)),
                         contentDescription = null
                     )
-
                 }
-
             )
 
             Spacer(modifier = Modifier.height(10.dp))
 
             Button( modifier = Modifier.fillMaxWidth(),
-
-                onClick = {showToast(context,"Login button clicked")}) {
+                onClick = {
+                    if(isEmailValid(email.value)){
+                        showToast(context,"Login button clicked")
+                    }
+                    else{
+                        showToast(context,"invalid email")
+                    }
+                })
+            {
                 Text(text = "Login")
             }
-
-
-
         }
     }
-
 }
 
 @Composable
