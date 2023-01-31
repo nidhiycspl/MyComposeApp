@@ -1,9 +1,11 @@
 package com.example.mycomposeapp
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -40,14 +42,8 @@ class Login : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MyComposeAppTheme {
-                // A surface container using the 'background' color from the theme
-//                Surface(
-//                    modifier = Modifier.fillMaxSize(),
-//                    color = MaterialTheme.colors.background
-//                ) {
-//                    Greeting2("Android")
-//                }
                 LoginScreenUi(this)
+
             }
         }
     }
@@ -58,7 +54,7 @@ fun LoginScreenUi(context: Context) {
     val focusManager = LocalFocusManager.current
     var email = remember { mutableStateOf("") }
     var password = remember { mutableStateOf("") }
-    var isError by rememberSaveable { mutableStateOf(false) }
+    var emailError = remember{ mutableStateOf("") }
 
     Box(modifier = Modifier
         .fillMaxSize()
@@ -105,7 +101,11 @@ fun LoginScreenUi(context: Context) {
                 value = email.value ,
                 onValueChange = {
                         email.value = it
-                        isError = false
+                    if(!isEmailValid(email.value)){
+                        emailError.value = "Invalid email"
+                    }else{
+                        emailError.value = ""
+                    }
                 },
                 label = { Text(text = "Email")},
                 singleLine = true,
@@ -128,6 +128,16 @@ fun LoginScreenUi(context: Context) {
                     }
                 }
             )
+            AnimatedVisibility(visible = emailError.value.isNotEmpty()) {
+                emailError.let { error ->
+                    Text(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                        text = "error",
+                        color = MaterialTheme.colors.error
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -157,6 +167,7 @@ fun LoginScreenUi(context: Context) {
                 onClick = {
                     if(isEmailValid(email.value)){
                         showToast(context,"Login button clicked")
+                        context.startActivity(Intent(context,Home::class.java))
                     }
                     else{
                         showToast(context,"invalid email")
